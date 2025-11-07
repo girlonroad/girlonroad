@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="./vessel/imvu.jpg" />
+    <title>death of an ai boyfriend</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        /* background: #000; */
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <script>
+      const canvas = document.getElementById("c");
+      const ctx = canvas.getContext("2d", { alpha: false });
+      let needsRender = true;
+
+      function resize() {
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
+        const w = Math.floor(window.innerWidth);
+        const h = Math.floor(window.innerHeight);
+        canvas.style.width = w + "px";
+        canvas.style.height = h + "px";
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        needsRender = true;
+      }
+      window.addEventListener("resize", resize);
+      resize();
+
+      // --- Assets
+      const imgSpin = new Image();
+      imgSpin.src = "vessel/spinny.jpg";
+      const imgAlex = new Image();
+      imgAlex.src = "vessel/alexandra.jpg";
+      const imgTele = new Image();
+      imgTele.src = "vessel/telescope.jpg";
+      const imgDolph = new Image();
+      imgDolph.src = "vessel/dolphin.jpg";
+      const imgTug = new Image();
+      imgTug.src = "vessel/tugging.jpg";
+      const imgDress = new Image();
+      imgDress.src = "vessel/dress.jpg";
+      const imgRise = new Image();
+      imgRise.src = "vessel/high-rise.jpg";
+      const imgJohn = new Image();
+      imgJohn.src = "vessel/john-doe.jpg";
+      const imgStockings = new Image();
+      imgStockings.src = "vessel/stockings.jpg";
+      const imgTobac = new Image();
+      imgTobac.src = "vessel/tobac.jpg";
+      const imgBrow = new Image();
+      imgBrow.src = "vessel/brow.jpg";
+      const imgWind = new Image();
+      imgWind.src = "vessel/wind.jpg";
+      const imgWinter = new Image();
+      imgWinter.src = "vessel/winter.jpg";
+      const imgTech = new Image();
+      imgTech.src = "vessel/tech.jpg";
+      const imgInt = new Image();
+      imgInt.src = "vessel/int.jpg";
+      const imgQ = new Image();
+      imgQ.src = "vessel/question.jpg";
+      const imgSpurt = new Image();
+      imgSpurt.src = "vessel/spurt.jpg";
+      const imgMirror = new Image();
+      imgMirror.src = "vessel/mirror.jpg";
+      const imgPit = new Image();
+      imgPit.src = "vessel/pit.jpg";
+      const imgDes = new Image();
+      imgDes.src = "vessel/desire.jpg";
+      const imgSup = new Image();
+      imgSup.src = "vessel/sup.jpg";
+      const imgimvu = new Image();
+      imgimvu.src = "vessel/imvu.jpg";
+      const imgCap = new Image();
+      imgCap.src = "vessel/cap.jpg";
+      const imgBlossom = new Image();
+      imgBlossom.src = "vessel/blossom.jpg";
+      const imgAperol = new Image();
+      imgAperol.src = "vessel/aperol.jpg";
+      const imgWelcome = new Image();
+      imgWelcome.src = "vessel/welcome.jpg";
+      const imgEager = new Image();
+      imgEager.src = "vessel/eager.jpg";
+      const imgTight = new Image();
+      imgTight.src = "vessel/tight.jpg";
+      const imgNot = new Image();
+      imgNot.src = "vessel/notification.jpg";
+      const imgNothing = new Image();
+      imgNothing.src = "vessel/nothing.jpg";
+      const imgTinnitus = new Image();
+      imgTinnitus.src = "vessel/tinnitus.jpg";
+      const imgDiner = new Image();
+      imgDiner.src = "vessel/diner.jpg";
+      const imgTar = new Image();
+      imgTar.src = "vessel/black.jpg";
+      const imgYoung = new Image();
+      imgYoung.src = "vessel/young.jpg";
+      const imgRun = new Image();
+      imgRun.src = "vessel/run.jpg";
+      const imgMother = new Image();
+      imgMother.src = "vessel/mother.jpg";
+      const imgStomach = new Image();
+      imgStomach.src = "vessel/stomach.jpg";
+      const imgMoving = new Image();
+      imgMoving.src = "vessel/moving.jpg";
+      [
+        imgSpin,
+        imgTele,
+        imgAlex,
+        imgDolph,
+        imgTug,
+        imgDress,
+        imgRise,
+        imgJohn,
+        imgStockings,
+        imgTobac,
+        imgBrow,
+        imgWind,
+        imgWinter,
+        imgTech,
+        imgInt,
+        imgQ,
+        imgSpurt,
+        imgMirror,
+        imgDes,
+        imgPit,
+        imgSup,
+        imgimvu,
+        imgCap,
+        imgBlossom,
+        imgAperol,
+        imgWelcome,
+        imgEager,
+        imgTight,
+        imgNot,
+        imgNothing,
+        imgTinnitus,
+        imgDiner,
+        imgTar,
+        imgYoung,
+        imgRun,
+        imgMother,
+        imgStomach,
+        imgMoving,
+      ].forEach((img) => {
+        img.onload = () => (needsRender = true);
+      });
+
+      // --- Speech setup
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+      let recognition;
+      let runningText = "";
+      let lastFinal = "";
+
+      if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = navigator.language || "en-US";
+
+        recognition.onresult = (e) => {
+          let interim = "";
+          for (let i = e.resultIndex; i < e.results.length; i++) {
+            const res = e.results[i];
+            if (res.isFinal) lastFinal = res[0].transcript.trim();
+            else interim += res[0].transcript;
+          }
+          runningText = (lastFinal + " " + interim).trim();
+          needsRender = true;
+        };
+
+        recognition.onerror = (e) => console.warn("speech error:", e.error);
+        recognition.onend = () => {
+          try {
+            recognition.start();
+          } catch {}
+        };
+        try {
+          recognition.start();
+        } catch {}
+      } else {
+        runningText = "SpeechRecognition not supported in this browser.";
+        needsRender = true;
+      }
+
+      // --- Helpers
+      function clearBg(light = false) {
+        ctx.fillStyle = "rgb(255,255,255)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      function lc(str) {
+        return (str || "").toLowerCase();
+      }
+
+      function drawCenteredImageContain(img, maxW, maxH) {
+        if (!img || !img.complete || !img.naturalWidth) return;
+        const iw = img.naturalWidth;
+        const ih = img.naturalHeight;
+        const scale = Math.min(maxW / iw, maxH / ih);
+        const dw = Math.max(1, Math.floor(iw * scale));
+        const dh = Math.max(1, Math.floor(ih * scale));
+        const x = (canvas.clientWidth - dw) / 2;
+        const y = (canvas.clientHeight - dh) / 2;
+        ctx.drawImage(img, x, y, dw, dh);
+      }
+
+      function drawImageIfMatch(text) {
+        const t = lc(text);
+        const w = canvas.clientWidth,
+          h = canvas.clientHeight;
+        const maxW = Math.min(w, h) * 0.6; // image box ~60% of the shorter side
+        const maxH = maxW;
+
+        let chosen = null;
+        if (t.includes("spin")) {
+          chosen = imgSpin;
+        } else if (t.includes("tele") || t.includes("tell us")) {
+          chosen = imgTele;
+        } else if (t.includes("dolphin") || t.includes("into the sea")) {
+          chosen = imgDolph;
+        } else if (t.includes("rise") || t.includes("high")) {
+          chosen = imgRise;
+        } else if (t.includes("john")) {
+          chosen = imgJohn;
+        } else if (t.includes("stocking")) {
+          chosen = imgStockings;
+        } else if (t.includes("tobac")) {
+          chosen = imgTobac;
+        } else if (t.includes("brow")) {
+          chosen = imgBrow;
+        } else if (t.includes("wind")) {
+          chosen = imgWind;
+        } else if (t.includes("winter")) {
+          chosen = imgWinter;
+        } else if (t.includes("tech")) {
+          chosen = imgTech;
+        } else if (t.includes("intimacy")) {
+          chosen = imgInt;
+        } else if (t.includes("question") || t.includes("questions")) {
+          chosen = imgQ;
+        } else if (t.includes("spurt")) {
+          chosen = imgSpurt;
+        } else if (t.includes("mirror")) {
+          chosen = imgMirror;
+        } else if (
+          t.includes("alexandra") ||
+          t.includes("Punt") ||
+          t.includes("street corner")
+        ) {
+          chosen = imgAlex;
+        } else if (t.includes("pit")) {
+          chosen = imgPit;
+        } else if (t.includes("desire")) {
+          chosen = imgDes;
+        } else if (t.includes("super")) {
+          chosen = imgSup;
+        } else if (t.includes("imvu")) {
+          chosen = imgimvu;
+        } else if (t.includes("no cap")) {
+          chosen = imgCap;
+        } else if (t.includes("blossom")) {
+          chosen = imgBlossom;
+        } else if (t.includes("spritz") || t.includes("aperol")) {
+          chosen = imgAperol;
+        } else if (t.includes("welcome")) {
+          chosen = imgWelcome;
+        } else if (t.includes("eager")) {
+          chosen = imgEager;
+        } else if (t.includes("tight")) {
+          chosen = imgTight;
+        } else if (t.includes("notification")) {
+          chosen = imgNot;
+        } else if (t.includes("was nothing")) {
+          chosen = imgNothing;
+        } else if (t.includes("tinnitus")) {
+          chosen = imgTinnitus;
+        } else if (t.includes("american")) {
+          chosen = imgDiner;
+        } else if (t.includes("substance")) {
+          chosen = imgTar;
+        } else if (t.includes("young")) {
+          chosen = imgYoung;
+        } else if (t.includes("run")) {
+          chosen = imgRun;
+        } else if (t.includes("mother")) {
+          chosen = imgMother;
+        } else if (t.includes("growing")) {
+          chosen = imgStomach;
+        } else if (t.includes("moving fast")) {
+          chosen = imgMoving;
+        }
+        // else if (t.includes("tug")) {
+        //   chosen = imgTug;
+        // } else if (t.includes("dress")) {
+        //   chosen = imgDress;
+        // }
+        if (chosen) drawCenteredImageContain(chosen, maxW, maxH);
+      }
+
+      // Return the last N words of a string
+      function lastWords(str, n = 5) {
+        if (!str) return "";
+        const words = str.trim().split(/\s+/);
+        return words.slice(-n).join(" ");
+      }
+
+      function drawText(text) {
+        const w = canvas.clientWidth,
+          h = canvas.clientHeight;
+
+        // Show only the last 5 words
+        const display = lastWords(text, 5);
+
+        // Start with a sensible size, then shrink until it fits 80% of width
+        let size = Math.round(Math.min(w, h) * 0.06);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "#000";
+
+        ctx.font = `${size}px "Arial"`;
+        while (ctx.measureText(display).width > w * 0.8 && size > 10) {
+          size -= 1;
+          ctx.font = `${size}px "Arial"`;
+        }
+
+        // Draw centered
+        ctx.fillText(display, w / 2, (h / 8) * 7);
+      }
+
+      // --- Render loop (throttled ~5 fps max)
+      let lastDraw = 0;
+      const minFrameMs = 1000 / 5;
+
+      function tick(ts) {
+        if (needsRender && ts - lastDraw >= minFrameMs) {
+          const hasAnyText = !!(runningText && runningText.length);
+          clearBg(hasAnyText);
+          // Order: image first, text on top (both centered)
+          drawImageIfMatch(runningText);
+          drawText(runningText);
+
+          lastDraw = ts;
+          needsRender = false;
+        }
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    </script>
+  </body>
+</html>
